@@ -17,11 +17,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: '22.11.0'  # Specify your Node.js version here
 
       - name: Install dependencies
         run: |
-          npm i
+          npm ci  # Install dependencies (use `npm install` if you haven't configured package-lock.json)
 
       - name: Build Docusaurus site
         run: |
@@ -30,7 +30,6 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages
-          folder: build
-          token: ${{ secrets.GITHUB_TOKEN }}
-#
+          branch: gh-pages  # The branch where the site will be deployed
+          folder: build  # The folder containing the built site
+          token: ${{ secrets.GH_PAT }}  # Use your personal access token stored in GitHub secrets
