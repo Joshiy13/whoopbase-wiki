@@ -1,11 +1,13 @@
 ---
 slug: welcome
 title: Welcome
-authors: [Josh]
-tags: [hello, whoopbase]
+authors: [slorber, yangshun]
+tags: [facebook, hello, docusaurus]
 ---
 
-Here are a few tips you might find useful.
+[Docusaurus blogging features](https://docusaurus.io/docs/blog) are powered by the [blog plugin](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-blog).
+
+Here are a few tips you might find useful
 
 <!-- truncate -->
 
