@@ -3,14 +3,14 @@ name: Deploy Docusaurus Site
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to the main branch
+      - main  
   pull_request:
     branches:
-      - main  # Trigger the workflow on pull requests to the main branch
+      - main 
 
 jobs:
-  deploy:
-    name: Deploy to GitHub Pages
+  build:
+    name: Build Docusaurus Site
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,30 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.11.0'  # Specify your Node.js version here
+          node-version: '22.11.0'  
+
+      - name: Install dependencies
+        run: |
+          npm ci  # Install dependencies (use `npm install` if you haven't configured package-lock.json)
+
+      - name: Build Docusaurus site
+        run: |
+          npm run build  # Build the Docusaurus website
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.11.0' 
 
       - name: Install dependencies
         run: |
@@ -31,10 +54,8 @@ jobs:
           npm run build  # Build the Docusaurus website
 
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'push'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages  # The branch where the site will be deployed
-          folder: build  # The folder containing the built site
-          token: ${{ secrets.GH_PAT }}  # Use your personal access token stored in GitHub secrets
-
+          branch: gh-pages  
+          folder: build 
+          token: ${{ secrets.GH_PAT }} 
