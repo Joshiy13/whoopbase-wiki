@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main  # Trigger the workflow on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger the workflow on pull requests to the main branch
 
 jobs:
   deploy:
@@ -28,8 +31,56 @@ jobs:
           npm run build  # Build the Docusaurus website
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages  # The branch where the site will be deployed
           folder: build  # The folder containing the built site
           token: ${{ secrets.GH_PAT }}  # Use your personal access token stored in GitHub secrets
+
+  deploy-test:
+    name: Deploy to GitHub Pages Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.11.0'  # Specify your Node.js version here
+
+      - name: Install dependencies
+        run: |
+          npm ci  # Install dependencies (use `npm install` if you haven't configured package-lock.json)
+
+      - name: Build Docusaurus site
+        run: |
+          npm run build  # Build the Docusaurus website
+
+      - name: Deploy to GitHub Pages Test
+        if: github.event_name == 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages-test  # The branch where the test site will be deployed
+          folder: build  # The folder containing the built site
+          token: ${{ secrets.GH_PAT }}  # Use your personal access token stored in GitHub secrets
+
+      - name: Create status check
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const status = context.payload.workflow_run.conclusion === 'success' ? 'success' : 'failure';
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: context.payload.pull_request.head.sha,
+              state: status,
+              context: 'Deploy to GitHub Pages Test',
+              description: status === 'success' ? 'Deployment succeeded' : 'Deployment failed',
+            });
