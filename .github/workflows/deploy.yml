@@ -1,13 +1,13 @@
-name: Test Docusaurus Site
+name: Deploy Docusaurus Site
 
 on:
-  pull_request:
+  push:
     branches:
-      - main  # Trigger the workflow on pull requests to the main branch
+      - main  # Trigger the workflow on push to the main branch
 
 jobs:
-  build-test:
-    name: Build Docusaurus Site for PR
+  deploy:
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
 
     steps:
@@ -27,19 +27,9 @@ jobs:
         run: |
           npm run build  # Build the Docusaurus website
 
-      - name: Create status check
-        uses: actions/github-script@v6
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          script: |
-            const { context } = require('@actions/github');
-            const { owner, repo } = context.repo;
-            const pull_number = context.payload.pull_request.number;
-            const status = context.payload.workflow_run.conclusion === 'success' ? 'success' : 'failure';
-            await github.rest.repos.createCommitStatus({
-              owner,
-              repo,
-              sha: context.payload.pull_request.head.sha,
-              state: status,
-              context: 'Build Docusaurus Site',
-              description: status === 'success' ? 'Build succeeded' : 'Build failed',
-            });
+          branch: gh-pages  # The branch where the site will be deployed
+          folder: build  # The folder containing the built site
+          token: ${{ secrets.GITHUB_TOKEN }}  # Use the default GitHub token
