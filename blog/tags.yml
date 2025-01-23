@@ -1,7 +1,7 @@
-facebook:
-  label: Facebook
-  permalink: /facebook
-  description: Facebook tag description
+updates:
+  label: Updates
+  permalink: /updates
+  description: A tag for whoopbase
 
 hello:
   label: Hello
